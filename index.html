@@ -101,13 +101,14 @@
             const name = document.getElementById('name').value;
             const message = document.getElementById('message').value;
 
-            fetch('https://gaesteliste.onrender.com', { // Dies ist deine Render-URL
+            fetch('https://gaesteliste.onrender.com/submit-message', {
     method: 'POST',
     headers: {
         'Content-Type': 'application/json'
     },
     body: JSON.stringify({ name, message })
 })
+
 .then(response => response.text())
 .then(data => {
     document.getElementById('response').innerHTML = data;
