@@ -26,10 +26,11 @@ app.post('/submit-message', async (req, res) => {
         await pool.query('INSERT INTO messages (name, message) VALUES ($1, $2)', [name, message]);
         res.send('Nachricht erfolgreich gespeichert.');
     } catch (error) {
-        console.error('Fehler beim Speichern der Nachricht:', error);
-        res.status(500).send('Fehler beim Speichern der Nachricht.');
+        console.error('Fehler beim Speichern der Nachricht:', error); // Protokolliere den genauen Fehler
+        res.status(500).send('Fehler beim Speichern der Nachricht: ' + error.message); // Sende die genaue Fehlermeldung
     }
 });
+
 
 // Starte den Server
 app.listen(PORT, () => {
