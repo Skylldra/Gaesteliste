@@ -157,7 +157,7 @@
 
         // Nachrichten laden und in der Textbox anzeigen
         function loadMessages() {
-            fetch('https://gaesteliste.onrender.com/submit-message') // Render-URL anpassen
+            fetch('https://gaesteliste.onrender.com/get-message') // Render-URL anpassen
                 .then(response => {
                     if (!response.ok) {
                         throw new Error('Fehler beim Abrufen der Nachrichten: ' + response.statusText);
