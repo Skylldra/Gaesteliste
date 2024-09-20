@@ -6,6 +6,8 @@ const app = express();
 const PORT = process.env.PORT || 3000;
 
 // Verwende den Access Token aus der Umgebungsvariable
+require('dotenv').config();
+
 const dbx = new Dropbox({ accessToken: process.env.DROPBOX_ACCESS_TOKEN, fetch: fetch });
 
 app.use(bodyParser.json());
