@@ -1,37 +1,22 @@
-const express = require('express');
-const bodyParser = require('body-parser');
-const { Dropbox } = require('dropbox');
-const fetch = require('node-fetch');
-const app = express();
-const PORT = process.env.PORT || 3000;
+const { Pool } = require('pg');
 
-// Verwende den Access Token aus der Umgebungsvariable
-require('dotenv').config();
-
-const dbx = new Dropbox({ accessToken: process.env.DROPBOX_ACCESS_TOKEN, fetch: fetch });
-
-app.use(bodyParser.json());
-
-app.post('/submit-message', (req, res) => {
-    const { name, message } = req.body;
-    const textToSave = `"${message}" von ${name}\n`;
-
-    // Upload der Nachricht zu Dropbox
-    dbx.filesUpload({
-        path: '/Nachrichten.txt',
-        contents: textToSave,
-        mode: { ".tag": "append" } // Fügt den Text ans Ende der Datei an
-    })
-    .then(response => {
-        console.log('Nachricht erfolgreich gespeichert:', response);
-        res.send('Nachricht erfolgreich gespeichert.');
-    })
-    .catch(error => {
-        console.error('Fehler beim Hochladen in Dropbox:', error);
-        res.status(500).send('Fehler beim Speichern der Nachricht.');
-    });
+// Erstelle eine Verbindung zur PostgreSQL-Datenbank
+const pool = new Pool({
+    user: 'YOUR_DB_USER',
+    host: 'YOUR_DB_HOST',
+    database: 'YOUR_DB_NAME',
+    password: 'YOUR_DB_PASSWORD',
+    port: 'YOUR_DB_PORT',
 });
 
-app.listen(PORT, () => {
-    console.log(`Server läuft auf Port ${PORT}`);
+// Route für das Speichern der Nachricht in der Datenbank
+app.post('/submit-message', async (req, res) => {
+    const { name, message } = req.body;
+    try {
+        await pool.query('INSERT INTO messages (name, message) VALUES ($1, $2)', [name, message]);
+        res.send('Nachricht erfolgreich gespeichert.');
+    } catch (error) {
+        console.error('Fehler beim Speichern der Nachricht:', error);
+        res.status(500).send('Fehler beim Speichern der Nachricht.');
+    }
 });
