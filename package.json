@@ -1,7 +1,6 @@
 {
   "name": "freundebuch",
   "version": "1.0.0",
-  "description": "Freundebuch App",
   "main": "server.js",
   "scripts": {
     "start": "node server.js"
