@@ -102,13 +102,14 @@
             const message = document.getElementById('message').value;
 
             // AJAX-POST-Anfrage an den Server
-            fetch('http://localhost:3000/submit-message', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json'
-                },
-                body: JSON.stringify({ name, message })
-            })
+            fetch('https://gaesteliste.onrender.com', {
+    		method: 'POST',
+    		headers: {
+        		'Content-Type': 'application/json'
+    		},
+    		body: JSON.stringify({ name, message })
+	})
+
             .then(response => response.text())
             .then(data => {
                 document.getElementById('response').innerHTML = data;
