@@ -14,9 +14,14 @@ const filePath = path.join(__dirname, 'Nachrichten.txt');
 
 // Route für das Speichern der Nachricht in der Textdatei
 app.post('/submit-message', (req, res) => {
+    console.log('POST /submit-message aufgerufen');
+    
     const { name, message } = req.body;
 
-    // Überprüfe, ob die Felder korrekt übermittelt wurden
+    // Protokolliere die empfangenen Daten
+    console.log('Empfangene Daten:', { name, message });
+
+    // Überprüfe, ob die Daten korrekt übermittelt wurden
     if (!name || !message) {
         console.error('Fehler: Name oder Nachricht fehlen.');
         return res.status(400).send('Fehler: Name oder Nachricht fehlen.');
@@ -30,10 +35,10 @@ app.post('/submit-message', (req, res) => {
             console.error('Fehler beim Schreiben in die Datei:', err);
             return res.status(500).send('Fehler beim Speichern der Nachricht.');
         }
+        console.log('Nachricht erfolgreich gespeichert.');
         res.send('Nachricht erfolgreich gespeichert.');
     });
 });
-
 
 // Route zum Abrufen der Nachrichten
 app.get('/get-messages', (req, res) => {
