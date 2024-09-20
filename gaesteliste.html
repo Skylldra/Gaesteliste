@@ -1,0 +1,123 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Online Gästeliste</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f4f4f4;
+            margin: 0;
+            padding: 20px;
+            text-align: center;
+        }
+
+        h1 {
+            color: #333;
+        }
+
+        .container {
+            background-color: #fff;
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+            max-width: 400px;
+            margin: 0 auto;
+            box-sizing: border-box;
+        }
+
+        input, textarea {
+            width: calc(100% - 20px);
+            padding: 10px;
+            margin: 10px 0;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            font-size: 16px;
+            box-sizing: border-box;
+        }
+
+        button {
+            padding: 10px 20px;
+            background-color: #4CAF50;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 16px;
+            margin-top: 10px;
+        }
+
+        button:hover {
+            background-color: #45a049;
+        }
+
+        .personal-message {
+            font-size: 16px;
+            color: #555;
+            margin-bottom: 20px;
+        }
+
+        @media (max-width: 600px) {
+            body {
+                padding: 10px;
+            }
+
+            .container {
+                padding: 15px;
+                max-width: 100%;
+            }
+
+            input, textarea {
+                width: calc(100% - 20px);
+            }
+        }
+    </style>
+</head>
+<body>
+    <h1>♡ Willkommen auf der Party! ♡</h1>
+    
+    <!-- Personalisierte Nachricht -->
+    <p class="personal-message">Danke, dass du heute hier bist! <br>
+								Hinterlasse gerne eine Nachricht für mich – ich freue mich auf deine Worte!</p>
+    
+    <div class="container">
+        <form id="friendbookForm">
+            <label for="name">Dein Name:</label>
+            <input type="text" id="name" name="name" placeholder="Dein Name" required>
+
+            <label for="message">Deine Nachricht:</label>
+            <textarea id="message" name="message" placeholder="Schreib eine Nachricht" rows="4" required></textarea>
+
+            <button type="submit">Absenden</button>
+        </form>
+        <p id="response"></p>
+    </div>
+
+    <script>
+        document.getElementById('friendbookForm').addEventListener('submit', function(event) {
+            event.preventDefault();
+
+            const name = document.getElementById('name').value;
+            const message = document.getElementById('message').value;
+
+            // AJAX-POST-Anfrage an den Server
+            fetch('http://localhost:3000/submit-message', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({ name, message })
+            })
+            .then(response => response.text())
+            .then(data => {
+                document.getElementById('response').innerHTML = data;
+            })
+            .catch((error) => {
+                document.getElementById('response').innerHTML = 'Fehler beim Senden der Nachricht.';
+                console.error('Fehler:', error);
+            });
+        });
+    </script>
+</body>
+</html>
