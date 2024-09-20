@@ -94,31 +94,5 @@
         <p id="response"></p>
     </div>
 
-    <script>
-        document.getElementById('friendbookForm').addEventListener('submit', function(event) {
-            event.preventDefault();
-
-            const name = document.getElementById('name').value;
-            const message = document.getElementById('message').value;
-
-            fetch('https://gaesteliste.onrender.com/submit-message', {
-    method: 'POST',
-    headers: {
-        'Content-Type': 'application/json'
-    },
-    body: JSON.stringify({ name, message })
-})
-
-.then(response => response.text())
-.then(data => {
-    document.getElementById('response').innerHTML = data;
-})
-.catch((error) => {
-    document.getElementById('response').innerHTML = 'Fehler beim Senden der Nachricht.';
-    console.error('Fehler:', error);
-});
-
-        });
-    </script>
-</body>
-</html>
+    <!-- Button zum Anzeigen der Nachrichten -->
+    <button onclick="win
