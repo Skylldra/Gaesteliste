@@ -125,13 +125,6 @@
             const name = document.getElementById('name').value;
             const message = document.getElementById('message').value;
 
-            // Prüfe, ob beide Felder ausgefüllt sind
-            if (!name || !message) {
-                document.getElementById('response').innerHTML = 'Fehler: Name oder Nachricht fehlen.';
-                return;
-            }
-
-            // Sende die Nachricht über den POST-Request
             fetch('https://gaesteliste.onrender.com/submit-message', { // Render-URL anpassen
                 method: 'POST',
                 headers: {
@@ -139,37 +132,26 @@
                 },
                 body: JSON.stringify({ name, message })
             })
-            .then(response => {
-                if (!response.ok) {
-                    throw new Error('Fehler beim Senden der Nachricht: ' + response.statusText);
-                }
-                return response.text();
-            })
+            .then(response => response.text())
             .then(data => {
                 document.getElementById('response').innerHTML = data;
-                console.log('Antwort vom Server:', data); // Serverantwort in der Konsole anzeigen
             })
             .catch((error) => {
                 document.getElementById('response').innerHTML = 'Fehler beim Senden der Nachricht.';
-                console.error('Fehler beim Senden der Nachricht:', error); // Fehler in der Konsole anzeigen
+                console.error('Fehler:', error);
             });
         });
 
         // Nachrichten laden und in der Textbox anzeigen
         function loadMessages() {
-            fetch('https://gaesteliste.onrender.com/get-message') // Render-URL anpassen
-                .then(response => {
-                    if (!response.ok) {
-                        throw new Error('Fehler beim Abrufen der Nachrichten: ' + response.statusText);
-                    }
-                    return response.text();
-                })
+            fetch('https://gaesteliste.onrender.com/get-messages') // Render-URL anpassen
+                .then(response => response.text())
                 .then(data => {
                     document.getElementById('messageBox').innerHTML = `<pre>${data}</pre>`;
                 })
                 .catch((error) => {
                     document.getElementById('messageBox').innerHTML = 'Fehler beim Laden der Nachrichten.';
-                    console.error('Fehler beim Laden der Nachrichten:', error); // Fehler in der Konsole anzeigen
+                    console.error('Fehler:', error);
                 });
         }
     </script>
