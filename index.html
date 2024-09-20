@@ -7,21 +7,22 @@
     <style>
         body {
             font-family: Arial, sans-serif;
-            background-color: #f4f4f4;
+            background-color: #000; /* Schwarzer Hintergrund */
+            color: #fff; /* Weiße Schrift */
             margin: 0;
             padding: 20px;
             text-align: center;
         }
 
         h1 {
-            color: #333;
+            color: #fff; /* Weiße Schrift */
         }
 
         .container {
-            background-color: #fff;
+            background-color: #333; /* Dunkles Grau für den Container */
             padding: 20px;
             border-radius: 10px;
-            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.5);
             max-width: 400px;
             margin: 0 auto;
             box-sizing: border-box;
@@ -35,6 +36,8 @@
             border-radius: 5px;
             font-size: 16px;
             box-sizing: border-box;
+            background-color: #555; /* Grau für Eingabefelder */
+            color: #fff; /* Weiße Schrift */
         }
 
         button {
@@ -54,7 +57,7 @@
 
         .personal-message {
             font-size: 16px;
-            color: #555;
+            color: #fff; /* Weiße Schrift */
             margin-bottom: 20px;
         }
 
@@ -94,5 +97,32 @@
         <p id="response"></p>
     </div>
 
-    <!-- Button zum Anzeigen der Nachrichten -->
-    <button onclick="win
+    <!-- Button zum Öffnen der Nachrichten in einem neuen Tab -->
+    <button onclick="window.open('/get-messages', '_blank');">Nachrichten in neuem Tab anzeigen</button>
+
+    <script>
+        document.getElementById('friendbookForm').addEventListener('submit', function(event) {
+            event.preventDefault();
+
+            const name = document.getElementById('name').value;
+            const message = document.getElementById('message').value;
+
+            fetch('https://gaesteliste.onrender.com/submit-message', { // Deine Render-URL
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({ name, message })
+            })
+            .then(response => response.text())
+            .then(data => {
+                document.getElementById('response').innerHTML = data;
+            })
+            .catch((error) => {
+                document.getElementById('response').innerHTML = 'Fehler beim Senden der Nachricht.';
+                console.error('Fehler:', error);
+            });
+        });
+    </script>
+</body>
+</html>
