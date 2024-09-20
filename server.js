@@ -6,6 +6,11 @@ const PORT = process.env.PORT || 3000;
 
 app.use(bodyParser.json());
 
+// Serve a basic response for the root path
+app.get('/', (req, res) => {
+    res.send('<h1>Willkommen im Freundebuch!</h1><p>Die Seite funktioniert!</p>');
+});
+
 app.post('/submit-message', (req, res) => {
     const { name, message } = req.body;
     const textToSave = `"${message}" von ${name}\n`;
