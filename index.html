@@ -101,23 +101,22 @@
             const name = document.getElementById('name').value;
             const message = document.getElementById('message').value;
 
-            // AJAX-POST-Anfrage an den Server
-            fetch('https://gaesteliste.onrender.com', {
-    		method: 'POST',
-    		headers: {
-        		'Content-Type': 'application/json'
-    		},
-    		body: JSON.stringify({ name, message })
-	})
+            fetch('https://gaesteliste.onrender.com', { // Dies ist deine Render-URL
+    method: 'POST',
+    headers: {
+        'Content-Type': 'application/json'
+    },
+    body: JSON.stringify({ name, message })
+})
+.then(response => response.text())
+.then(data => {
+    document.getElementById('response').innerHTML = data;
+})
+.catch((error) => {
+    document.getElementById('response').innerHTML = 'Fehler beim Senden der Nachricht.';
+    console.error('Fehler:', error);
+});
 
-            .then(response => response.text())
-            .then(data => {
-                document.getElementById('response').innerHTML = data;
-            })
-            .catch((error) => {
-                document.getElementById('response').innerHTML = 'Fehler beim Senden der Nachricht.';
-                console.error('Fehler:', error);
-            });
         });
     </script>
 </body>
