@@ -10,8 +10,6 @@ const PORT = process.env.PORT || 3000;
 // Middleware
 app.use(bodyParser.json());
 
-const { Pool } = require('pg');
-
 // Erstelle eine Verbindung zur PostgreSQL-Datenbank
 const pool = new Pool({
     user: 'gaestelistedb_user',
