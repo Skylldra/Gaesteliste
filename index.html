@@ -61,6 +61,18 @@
             margin-bottom: 20px;
         }
 
+        .message-box {
+            background-color: #222; /* Dunkles Grau */
+            color: #fff;
+            padding: 10px;
+            width: 100%;
+            height: 200px;
+            overflow-y: scroll; /* Scrollen aktivieren */
+            margin-top: 20px;
+            border-radius: 5px;
+            border: 1px solid #555;
+        }
+
         @media (max-width: 600px) {
             body {
                 padding: 10px;
@@ -97,17 +109,23 @@
         <p id="response"></p>
     </div>
 
-    <!-- Button zum Öffnen der Nachrichten in einem neuen Tab -->
-    <button onclick="window.open('/get-messages', '_blank');">Nachrichten in neuem Tab anzeigen</button>
+    <!-- Scrollbare Textbox für Nachrichten -->
+    <div class="message-box" id="messageBox">
+        <p>Nachrichten werden hier angezeigt...</p>
+    </div>
+
+    <!-- Button zum Laden der Nachrichten in die Textbox -->
+    <button onclick="loadMessages()">Nachrichten laden</button>
 
     <script>
+        // Nachrichten absenden
         document.getElementById('friendbookForm').addEventListener('submit', function(event) {
             event.preventDefault();
 
             const name = document.getElementById('name').value;
             const message = document.getElementById('message').value;
 
-            fetch('https://gaesteliste.onrender.com/submit-message', { // Deine Render-URL
+            fetch('https://gaesteliste.onrender.com/submit-message', { // Render-URL anpassen
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json'
@@ -123,6 +141,19 @@
                 console.error('Fehler:', error);
             });
         });
+
+        // Nachrichten laden und in der Textbox anzeigen
+        function loadMessages() {
+            fetch('https://deine-app-url.onrender.com/get-messages') // Render-URL anpassen
+                .then(response => response.text())
+                .then(data => {
+                    document.getElementById('messageBox').innerHTML = `<pre>${data}</pre>`;
+                })
+                .catch((error) => {
+                    document.getElementById('messageBox').innerHTML = 'Fehler beim Laden der Nachrichten.';
+                    console.error('Fehler:', error);
+                });
+        }
     </script>
 </body>
 </html>
