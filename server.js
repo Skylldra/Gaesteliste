@@ -2,11 +2,11 @@ const { Pool } = require('pg');
 
 // Erstelle eine Verbindung zur PostgreSQL-Datenbank
 const pool = new Pool({
-    user: 'YOUR_DB_USER',
-    host: 'YOUR_DB_HOST',
-    database: 'YOUR_DB_NAME',
-    password: 'YOUR_DB_PASSWORD',
-    port: 'YOUR_DB_PORT',
+    user: 'gaestelistedb_user',
+    host: 'dpg-crmvhgl6l47c73a7mocg-a',
+    database: 'gaestelistedb',
+    password: 'sC1p2PyAAJQbzys1QKV6Z0hCQ8TsSCmE',
+    port: '5432',
 });
 
 // Route für das Speichern der Nachricht in der Datenbank
