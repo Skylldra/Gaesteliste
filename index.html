@@ -125,13 +125,14 @@
             const name = document.getElementById('name').value;
             const message = document.getElementById('message').value;
 
-            fetch('https://gaesteliste.onrender.com/submit-message', { // Render-URL anpassen
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json'
-                },
-                body: JSON.stringify({ name, message })
-            })
+            fetch('https://gaesteliste.onrender.com/submit-message', { // Deine Render-URL mit der Route /submit-message
+    		method: 'POST',
+    		headers: {
+        		'Content-Type': 'application/json'
+    		},
+    		body: JSON.stringify({ name, message })
+	})
+
             .then(response => response.text())
             .then(data => {
                 document.getElementById('response').innerHTML = data;
