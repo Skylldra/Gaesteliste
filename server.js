@@ -1,25 +1,25 @@
 const express = require('express');
 const bodyParser = require('body-parser');
 const cors = require('cors');
-const { Pool } = require('pg'); // PostgreSQL-Client
+const { Pool } = require('pg');
 
 const app = express();
 const PORT = process.env.PORT || 3000;
 
 // PostgreSQL-Verbindung
 const pool = new Pool({
-    connectionString: 'postgresql://gaestelistedb_o0ev_user:SsPaukVReZVdYnkCc7Ih1VQ2LtyUFHJb@dpg-crn9tft6l47c73ac0tvg-a/gaestelistedb_o0ev', // Füge deine Datenbank-URL ein
+    connectionString: 'deine_database_url_hier', // Ersetze durch deine PostgreSQL-Datenbank-URL
     ssl: {
-        rejectUnauthorized: false, // Falls SSL erforderlich ist
+        rejectUnauthorized: false,
     },
 });
 
 app.use(bodyParser.json());
 app.use(cors()); // CORS aktivieren
 
-const adminPassword = 'adminpassw0rd'; // Setze hier dein Admin-Passwort
+const adminPassword = 'dein_admin_passwort'; // Setze hier dein Admin-Passwort
 
-// Route für das Speichern der Nachricht in der Datenbank
+// Route zum Speichern der Nachricht
 app.post('/submit-message', async (req, res) => {
     const { name, message } = req.body;
 
@@ -33,7 +33,7 @@ app.post('/submit-message', async (req, res) => {
     }
 });
 
-// Route zum Abrufen der Nachrichten
+// Route zum Abrufen aller Nachrichten
 app.get('/get-messages', async (req, res) => {
     try {
         const result = await pool.query('SELECT * FROM messages ORDER BY id ASC');
@@ -49,11 +49,29 @@ app.get('/get-messages', async (req, res) => {
     }
 });
 
-// Route zum Löschen einer Nachricht
+// Route zum Löschen einer bestimmten Nachricht
+app.post('/admin/delete-message', async (req, res) => {
+    const { id, password } = req.body;
+
+    // Passwort prüfen
+    if (password !== adminPassword) {
+        return res.status(403).send('Falsches Passwort.');
+    }
+
+    try {
+        await pool.query('DELETE FROM messages WHERE id = $1', [id]);
+        res.send('Nachricht erfolgreich gelöscht.');
+    } catch (err) {
+        console.error('Fehler beim Löschen der Nachricht:', err);
+        res.status(500).send('Fehler beim Löschen der Nachricht.');
+    }
+});
+
+// Route zum Löschen aller Nachrichten
 app.post('/admin/clear-messages', async (req, res) => {
     const { password } = req.body;
 
-    // Prüfe, ob das Passwort korrekt ist
+    // Passwort prüfen
     if (password !== adminPassword) {
         return res.status(403).send('Falsches Passwort.');
     }
