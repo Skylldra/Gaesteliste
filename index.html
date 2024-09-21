@@ -66,6 +66,12 @@
             border: 1px solid #555;
         }
 
+        .delete-icon {
+            cursor: pointer;
+            color: red;
+            margin-right: 10px;
+        }
+
         @media (max-width: 600px) {
             body {
                 padding: 10px;
@@ -106,8 +112,6 @@
     </div>
 
     <button onclick="loadMessages()">Nachrichten laden</button>
-
-    <!-- Button zum Löschen aller Nachrichten -->
     <button onclick="clearMessages()">Alle Nachrichten löschen</button>
 
     <script>
@@ -147,6 +151,7 @@
                     data.forEach(msg => {
                         const messageItem = document.createElement('div');
                         messageItem.innerHTML = `
+                            <span class="delete-icon" onclick="deleteMessage(${msg.id})">🗑️</span>
                             <p>"${msg.message}" von ${msg.name}</p>
                         `;
                         messageBox.appendChild(messageItem);
@@ -156,6 +161,32 @@
                     document.getElementById('messageBox').innerHTML = 'Fehler beim Laden der Nachrichten.';
                     console.error('Fehler beim Laden der Nachrichten:', error);
                 });
+        }
+
+        // Nachricht löschen mit Passwortüberprüfung
+        function deleteMessage(id) {
+            const password = prompt('Bitte gib das Admin-Passwort ein:');
+            if (!password) {
+                alert('Abgebrochen.');
+                return;
+            }
+
+            fetch('https://gaesteliste.onrender.com/admin/delete-message', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({ id, password })
+            })
+            .then(response => response.text())
+            .then(data => {
+                alert(data);
+                loadMessages(); // Nachrichten neu laden nach dem Löschen
+            })
+            .catch((error) => {
+                alert('Fehler beim Löschen der Nachricht.');
+                console.error('Fehler:', error);
+            });
         }
 
         // Funktion zum Löschen aller Nachrichten
@@ -169,10 +200,10 @@
             fetch('https://gaesteliste.onrender.com/admin/clear-messages', {
                 method: 'POST',
                 headers: {
-                'Content-Type': 'application/json'
-            },
-            body: JSON.stringify({ password })
-        })
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({ password })
+            })
             .then(response => response.text())
             .then(data => {
                 alert(data);
