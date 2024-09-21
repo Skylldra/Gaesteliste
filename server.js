@@ -50,20 +50,20 @@ app.get('/get-messages', async (req, res) => {
 });
 
 // Route zum Löschen einer Nachricht
-app.post('/delete-message', async (req, res) => {
-    const { id, password } = req.body;
+app.post('/admin/clear-messages', async (req, res) => {
+    const { password } = req.body;
 
-    // Überprüfen des Admin-Passworts
+    // Prüfe, ob das Passwort korrekt ist
     if (password !== adminPassword) {
         return res.status(403).send('Falsches Passwort.');
     }
 
     try {
-        await pool.query('DELETE FROM messages WHERE id = $1', [id]);
-        res.send('Nachricht erfolgreich gelöscht.');
+        await pool.query('TRUNCATE TABLE messages');
+        res.send('Alle Nachrichten erfolgreich gelöscht.');
     } catch (err) {
-        console.error('Fehler beim Löschen der Nachricht:', err);
-        res.status(500).send('Fehler beim Löschen der Nachricht.');
+        console.error('Fehler beim Leeren der Tabelle:', err);
+        res.status(500).send('Fehler beim Leeren der Tabelle.');
     }
 });
 
