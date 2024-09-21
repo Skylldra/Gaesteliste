@@ -1,15 +1,13 @@
 const express = require('express');
 const bodyParser = require('body-parser');
 const fs = require('fs');
-const cors = require('cors'); // Importiere das CORS-Modul
+const cors = require('cors');
 const path = require('path');
 const app = express();
 const PORT = process.env.PORT || 3000;
 
 app.use(bodyParser.json());
-
-// Aktiviere CORS für alle Anfragen
-app.use(cors());
+app.use(cors()); // Aktiviere CORS
 
 // Serve a basic response for the root path
 app.get('/', (req, res) => {
