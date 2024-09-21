@@ -131,7 +131,7 @@
         		'Content-Type': 'application/json'
     		},
     		body: JSON.stringify({ name, message })
-	})
+		})
 
             .then(response => response.text())
             .then(data => {
@@ -145,16 +145,16 @@
 
         // Nachrichten laden und in der Textbox anzeigen
         function loadMessages() {
-    fetch('https://gaesteliste.onrender.com/get-messages') // Render-URL anpassen
-        .then(response => response.text())
-        .then(data => {
-            document.getElementById('messageBox').innerHTML = `<pre>${data}</pre>`; // Backticks um ${data}
-        })
-        .catch((error) => {
-            document.getElementById('messageBox').innerHTML = 'Fehler beim Laden der Nachrichten.';
-            console.error('Fehler beim Laden der Nachrichten:', error);
-        });
-}
+            fetch('https://gaesteliste.onrender.com/get-messages') // Render-URL anpassen
+                .then(response => response.text())
+                .then(data => {
+                    document.getElementById('messageBox').innerHTML = `<pre>${data}</pre>`; // Backticks um ${data}
+                })
+                .catch((error) => {
+                    document.getElementById('messageBox').innerHTML = 'Fehler beim Laden der Nachrichten.';
+                    console.error('Fehler beim Laden der Nachrichten:', error);
+                });
+        }
     </script>
 </body>
 </html>
