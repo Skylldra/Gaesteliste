@@ -1,186 +1,98 @@
-<!DOCTYPE html>
-<html lang="de">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Online Gästeliste</title>
-    <style>
-        body {
-            font-family: Arial, sans-serif;
-            background-color: #000;
-            color: #fff;
-            margin: 0;
-            padding: 20px;
-            text-align: center;
-        }
+const express = require('express');
+const bodyParser = require('body-parser');
+const cors = require('cors');
+const { Pool } = require('pg');
 
-        h1 {
-            color: #fff;
-        }
+const app = express();
+const PORT = process.env.PORT || 3000;
 
-        .container {
-            background-color: #333;
-            padding: 20px;
-            border-radius: 10px;
-            box-shadow: 0 0 10px rgba(0, 0, 0, 0.5);
-            max-width: 400px;
-            margin: 0 auto;
-            box-sizing: border-box;
-        }
+// PostgreSQL-Verbindung
+const pool = new Pool({
+    connectionString: 'deine_database_url_hier', // Füge deine Datenbank-URL ein
+    ssl: {
+        rejectUnauthorized: false,
+    },
+});
 
-        input, textarea {
-            width: calc(100% - 20px);
-            padding: 10px;
-            margin: 10px 0;
-            border: 1px solid #ddd;
-            border-radius: 5px;
-            font-size: 16px;
-            background-color: #555;
-            color: #fff;
-        }
+app.use(bodyParser.json());
+app.use(cors()); // CORS aktivieren
 
-        button {
-            padding: 10px 20px;
-            background-color: #4CAF50;
-            color: white;
-            border: none;
-            border-radius: 5px;
-            cursor: pointer;
-            font-size: 16px;
-            margin-top: 10px;
-        }
+const adminPassword = 'dein_admin_passwort'; // Setze hier dein Admin-Passwort
 
-        button:hover {
-            background-color: #45a049;
-        }
+// Route zum Speichern der Nachricht
+app.post('/submit-message', async (req, res) => {
+    const { name, message } = req.body;
 
-        .message-box {
-            background-color: #222;
-            color: #fff;
-            padding: 10px;
-            width: 100%;
-            height: 200px;
-            overflow-y: scroll;
-            margin-top: 20px;
-            border-radius: 5px;
-            border: 1px solid #555;
-        }
+    try {
+        const query = 'INSERT INTO messages (name, message) VALUES ($1, $2)';
+        await pool.query(query, [name, message]);
+        res.send('Nachricht erfolgreich gespeichert.');
+    } catch (err) {
+        console.error('Fehler beim Speichern der Nachricht:', err);
+        res.status(500).send('Fehler beim Speichern der Nachricht.');
+    }
+});
 
-        @media (max-width: 600px) {
-            body {
-                padding: 10px;
-            }
+// Route zum Abrufen aller Nachrichten mit Passwortschutz
+app.post('/admin/get-messages', async (req, res) => {
+    const { password } = req.body;
 
-            .container {
-                padding: 15px;
-                max-width: 100%;
-            }
+    // Passwort prüfen
+    if (password !== adminPassword) {
+        return res.status(403).send('Falsches Passwort.');
+    }
 
-            input, textarea {
-                width: calc(100% - 20px);
-            }
-        }
-    </style>
-</head>
-<body>
-    <h1>♡ Willkommen auf der Party! ♡</h1>
-    
-    <p class="personal-message">Danke, dass du heute hier bist! <br>
-    Hinterlasse gerne eine Nachricht für mich – ich freue mich auf deine Worte!</p>
-    
-    <div class="container">
-        <form id="friendbookForm">
-            <label for="name">Dein Name:</label>
-            <input type="text" id="name" name="name" placeholder="Dein Name" required>
+    try {
+        const result = await pool.query('SELECT * FROM messages ORDER BY id ASC');
+        const messages = result.rows.map(row => ({
+            id: row.id,
+            name: row.name,
+            message: row.message,
+        }));
+        res.json(messages);
+    } catch (err) {
+        console.error('Fehler beim Abrufen der Nachrichten:', err);
+        res.status(500).send('Fehler beim Abrufen der Nachrichten.');
+    }
+});
 
-            <label for="message">Deine Nachricht:</label>
-            <textarea id="message" name="message" placeholder="Schreib eine Nachricht" rows="4" required></textarea>
+// Route zum Löschen einer bestimmten Nachricht
+app.post('/admin/delete-message', async (req, res) => {
+    const { id, password } = req.body;
 
-            <button type="submit">Absenden</button>
-        </form>
-        <p id="response"></p>
-    </div>
+    // Passwort prüfen
+    if (password !== adminPassword) {
+        return res.status(403).send('Falsches Passwort.');
+    }
 
-    <div class="message-box" id="messageBox">
-        <p>Nachrichten werden hier angezeigt...</p>
-    </div>
+    try {
+        await pool.query('DELETE FROM messages WHERE id = $1', [id]);
+        res.send('Nachricht erfolgreich gelöscht.');
+    } catch (err) {
+        console.error('Fehler beim Löschen der Nachricht:', err);
+        res.status(500).send('Fehler beim Löschen der Nachricht.');
+    }
+});
 
-    <button onclick="loadMessages()">Nachrichten laden</button>
+// Route zum Löschen aller Nachrichten
+app.post('/admin/clear-messages', async (req, res) => {
+    const { password } = req.body;
 
-    <script>
-        // Nachrichten absenden
-        document.getElementById('friendbookForm').addEventListener('submit', function(event) {
-            event.preventDefault();
+    // Passwort prüfen
+    if (password !== adminPassword) {
+        return res.status(403).send('Falsches Passwort.');
+    }
 
-            const name = document.getElementById('name').value;
-            const message = document.getElementById('message').value;
+    try {
+        await pool.query('TRUNCATE TABLE messages');
+        res.send('Alle Nachrichten erfolgreich gelöscht.');
+    } catch (err) {
+        console.error('Fehler beim Leeren der Tabelle:', err);
+        res.status(500).send('Fehler beim Leeren der Tabelle.');
+    }
+});
 
-            fetch('https://gaesteliste.onrender.com/submit-message', { 
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json'
-                },
-                body: JSON.stringify({ name, message })
-            })
-            .then(response => response.text())
-            .then(data => {
-                document.getElementById('response').innerHTML = data;
-                loadMessages(); // Nachrichten nach dem Absenden neu laden
-            })
-            .catch((error) => {
-                document.getElementById('response').innerHTML = 'Fehler beim Senden der Nachricht.';
-                console.error('Fehler:', error);
-            });
-        });
-
-        // Nachrichten laden und in der Textbox anzeigen
-        function loadMessages() {
-            fetch('https://gaesteliste.onrender.com/get-messages')
-                .then(response => response.json())
-                .then(data => {
-                    const messageBox = document.getElementById('messageBox');
-                    messageBox.innerHTML = '';
-
-                    data.forEach(msg => {
-                        const messageItem = document.createElement('div');
-                        messageItem.innerHTML = `
-                            <p>"${msg.message}" von ${msg.name}</p>
-                            <button onclick="deleteMessage(${msg.id})">Löschen</button>
-                        `;
-                        messageBox.appendChild(messageItem);
-                    });
-                })
-                .catch((error) => {
-                    document.getElementById('messageBox').innerHTML = 'Fehler beim Laden der Nachrichten.';
-                    console.error('Fehler beim Laden der Nachrichten:', error);
-                });
-        }
-
-        // Nachricht löschen mit Passwortüberprüfung
-        function deleteMessage(id) {
-            const password = prompt('Bitte gib das Admin-Passwort ein:');
-            if (!password) {
-                alert('Abgebrochen.');
-                return;
-            }
-
-            fetch('https://gaesteliste.onrender.com/delete-message', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json'
-                },
-                body: JSON.stringify({ id, password })
-            })
-            .then(response => response.text())
-            .then(data => {
-                alert(data);
-                loadMessages(); // Nachrichten neu laden nach dem Löschen
-            })
-            .catch((error) => {
-                alert('Fehler beim Löschen der Nachricht.');
-                console.error('Fehler:', error);
-            });
-        }
-    </script>
-</body>
-</html>
+// Starte den Server
+app.listen(PORT, () => {
+    console.log(`Server läuft auf Port ${PORT}`);
+});
