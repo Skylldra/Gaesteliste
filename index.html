@@ -125,20 +125,17 @@
             const name = document.getElementById('name').value;
             const message = document.getElementById('message').value;
 
-            fetch('https://gaesteliste.onrender.com/submit-message', { // Render-URL mit der Route /submit-message
+            fetch('https://gaesteliste.onrender.com/submit-message', { // Deine Render-URL mit der Route /submit-message
     		method: 'POST',
     		headers: {
         		'Content-Type': 'application/json'
     		},
     		body: JSON.stringify({ name, message })
-		})
+	})
+
             .then(response => response.text())
             .then(data => {
                 document.getElementById('response').innerHTML = data;
-
-                // Leere die Eingabefelder nach dem Absenden 
-                document.getElementById('name').value = '';
-                document.getElementById('message').value = '';
             })
             .catch((error) => {
                 document.getElementById('response').innerHTML = 'Fehler beim Senden der Nachricht.';
@@ -146,20 +143,18 @@
             });
         });
 
-       // Nachrichten laden und in der Textbox anzeigen
-function loadMessages() {
-    fetch('https://gaesteliste.onrender.com/get-messages') // Render-URL anpassen
-        .then(response => {
-            if (!response.ok) {
-                throw new Error('Fehler beim Abrufen der Nachrichten: ' + response.statusText);
-            }
-            return response.text();
-        })
-        .then(data => {
-            document.getElementById('messageBox').innerHTML = `<pre>${data}</pre>`;
-        })
-        .catch((error) => {
-            document.getElementById('messageBox').innerHTML = 'Fehler beim Laden der Nachrichten.';
-            console.error('Fehler beim Laden der Nachrichten:', error);
-        });
-}
+        // Nachrichten laden und in der Textbox anzeigen
+        function loadMessages() {
+            fetch('https://gaesteliste.onrender.com/get-messages') // Render-URL anpassen
+                .then(response => response.text())
+                .then(data => {
+                    document.getElementById('messageBox').innerHTML = <pre>${data}</pre>;
+                })
+                .catch((error) => {
+                    document.getElementById('messageBox').innerHTML = 'Fehler beim Laden der Nachrichten.';
+                    console.error('Fehler:', error);
+                });
+        }
+    </script>
+</body>
+</html>
