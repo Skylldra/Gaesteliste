@@ -6,25 +6,33 @@ const { Pool } = require('pg'); // PostgreSQL-Client
 const app = express();
 const PORT = process.env.PORT || 3000;
 
-// PostgreSQL-Verbindung - füge hier deine Datenbankverbindungsdetails direkt ein
+// PostgreSQL-Verbindung über die externe oder interne Database-URL
 const pool = new Pool({
-    user: 'gaestelistedb_o0ev_user',      // PostgreSQL-Benutzername
-    host: 'dpg-crn9tft6l47c73ac0tvg-a',              // PostgreSQL-Host (z.B. "localhost" oder bei Render der spezifische Hostname)
-    database: 'gaestelistedb_o0ev',    // Name der Datenbank
-    password: 'SsPaukVReZVdYnkCc7Ih1VQ2LtyUFHJb',      // PostgreSQL-Passwort
-    port: 5432,                     // Port der PostgreSQL-Datenbank, in der Regel 5432
+    connectionString: 'postgresql://gaestelistedb_o0ev_user:SsPaukVReZVdYnkCc7Ih1VQ2LtyUFHJb@dpg-crn9tft6l47c73ac0tvg-a/gaestelistedb_o0ev', // Füge hier die interne oder externe URL ein
     ssl: {
-        rejectUnauthorized: false,  // Bei Cloud-Umgebungen wie Render oder Heroku notwendig
+        rejectUnauthorized: false, // Falls SSL erforderlich ist (z.B. bei Render)
     },
 });
 
 app.use(bodyParser.json());
-app.use(cors()); // Aktiviere CORS
+app.use(cors()); // CORS aktivieren
 
-// Serve a basic response for the root path
-app.get('/', (req, res) => {
-    res.send('<h1>Willkommen im Freundebuch!</h1><p>Die Seite funktioniert!</p>');
-});
+// Funktion zum Erstellen der Tabelle, falls sie nicht existiert
+const createTableIfNotExists = async () => {
+    const query = `
+        CREATE TABLE IF NOT EXISTS messages (
+            id SERIAL PRIMARY KEY,
+            name VARCHAR(100),
+            message TEXT
+        );
+    `;
+    try {
+        await pool.query(query);
+        console.log('Tabelle "messages" wurde erstellt oder existiert bereits.');
+    } catch (err) {
+        console.error('Fehler beim Erstellen der Tabelle:', err);
+    }
+};
 
 // Route für das Speichern der Nachricht in der Datenbank
 app.post('/submit-message', async (req, res) => {
@@ -53,7 +61,8 @@ app.get('/get-messages', async (req, res) => {
     }
 });
 
-// Starte den Server
-app.listen(PORT, () => {
+// Starte den Server und prüfe, ob die Tabelle erstellt werden muss
+app.listen(PORT, async () => {
     console.log(`Server läuft auf Port ${PORT}`);
+    await createTableIfNotExists(); // Tabelle beim Serverstart erstellen
 });
