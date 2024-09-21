@@ -8,7 +8,7 @@ const PORT = process.env.PORT || 3000;
 
 // PostgreSQL-Verbindung
 const pool = new Pool({
-    connectionString: 'deine_database_url_hier', // Ersetze durch deine PostgreSQL-Datenbank-URL
+    connectionString: 'postgresql://gaestelistedb_o0ev_user:SsPaukVReZVdYnkCc7Ih1VQ2LtyUFHJb@dpg-crn9tft6l47c73ac0tvg-a/gaestelistedb_o0ev', // Ersetze durch deine PostgreSQL-Datenbank-URL
     ssl: {
         rejectUnauthorized: false,
     },
