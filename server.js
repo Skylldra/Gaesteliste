@@ -2,9 +2,6 @@ const express = require('express');
 const bodyParser = require('body-parser');
 const cors = require('cors');
 const { Pool } = require('pg');
-const multer = require('multer');
-const path = require('path');
-const fs = require('fs');
 
 const app = express();
 const PORT = process.env.PORT || 3000;
@@ -19,18 +16,6 @@ const pool = new Pool({
 
 app.use(bodyParser.json());
 app.use(cors()); // CORS aktivieren
-
-// Setze Multer für das Hochladen von Bildern
-const storage = multer.diskStorage({
-    destination: (req, file, cb) => {
-        cb(null, 'uploads/'); // Ordner, in dem die Bilder gespeichert werden
-    },
-    filename: (req, file, cb) => {
-        cb(null, Date.now() + path.extname(file.originalname)); // Dateiname mit Zeitstempel und Original-Erweiterung
-    }
-});
-
-const upload = multer({ storage: storage });
 
 const adminPassword = 'adminpassw0rd'; // Setze hier dein Admin-Passwort
 
@@ -48,32 +33,57 @@ app.post('/submit-message', async (req, res) => {
     }
 });
 
-// Route zum Hochladen eines Fotos
-app.post('/upload-photo', upload.single('photo'), (req, res) => {
+// Route zum Abrufen aller Nachrichten
+app.get('/get-messages', async (req, res) => {
     try {
-        res.send(`Foto erfolgreich hochgeladen: ${req.file.filename}`);
+        const result = await pool.query('SELECT * FROM messages ORDER BY id ASC');
+        const messages = result.rows.map(row => ({
+            id: row.id,
+            name: row.name,
+            message: row.message,
+        }));
+        res.json(messages);
     } catch (err) {
-        console.error('Fehler beim Hochladen des Fotos:', err);
-        res.status(500).send('Fehler beim Hochladen des Fotos.');
+        console.error('Fehler beim Abrufen der Nachrichten:', err);
+        res.status(500).send('Fehler beim Abrufen der Nachrichten.');
     }
 });
 
-// Route zum Abrufen aller Fotos
-app.get('/get-photos', (req, res) => {
-    const directoryPath = path.join(__dirname, 'uploads');
+// Route zum Löschen einer bestimmten Nachricht
+app.post('/admin/delete-message', async (req, res) => {
+    const { id, password } = req.body;
 
-    fs.readdir(directoryPath, (err, files) => {
-        if (err) {
-            return res.status(500).send('Fehler beim Abrufen der Fotos.');
-        }
-        
-        const photoUrls = files.map(file => `/uploads/${file}`);
-        res.json(photoUrls);
-    });
+    // Passwort prüfen
+    if (password !== adminPassword) {
+        return res.status(403).send('Falsches Passwort.');
+    }
+
+    try {
+        await pool.query('DELETE FROM messages WHERE id = $1', [id]);
+        res.send('Nachricht erfolgreich gelöscht.');
+    } catch (err) {
+        console.error('Fehler beim Löschen der Nachricht:', err);
+        res.status(500).send('Fehler beim Löschen der Nachricht.');
+    }
 });
 
-// Statische Dateien aus dem 'uploads'-Ordner bereitstellen
-app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
+// Route zum Löschen aller Nachrichten
+app.post('/admin/clear-messages', async (req, res) => {
+    const { password } = req.body;
+
+    // Passwort prüfen
+    if (password !== adminPassword) {
+        return res.status(403).send('Falsches Passwort.');
+    }
+
+    try {
+        await pool.query('TRUNCATE TABLE messages');
+        res.send('Alle Nachrichten erfolgreich gelöscht.');
+    } catch (err) {
+        console.error('Fehler beim Leeren der Tabelle:', err);
+        res.status(500).send('Fehler beim Leeren der Tabelle.');
+    }
+});
 
 // Starte den Server
 app.listen(PORT, () => {
