@@ -17,7 +17,7 @@ const pool = new Pool({
 app.use(bodyParser.json());
 app.use(cors()); // CORS aktivieren
 
-const adminPassword = 'admin2002'; // Setze hier dein Admin-Passwort
+const adminPassword = 'adminpassw0rd'; // Setze hier dein Admin-Passwort
 
 // Route für das Speichern der Nachricht in der Datenbank
 app.post('/submit-message', async (req, res) => {
