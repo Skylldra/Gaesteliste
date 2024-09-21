@@ -17,7 +17,7 @@ app.get('/', (req, res) => {
 // Route für das Speichern der Nachricht in der Textdatei
 app.post('/submit-message', (req, res) => {
     const { name, message } = req.body;
-    const textToSave = `"${message}" von ${name} (${timestamp})\n`;
+    const textToSave = `"${message}" von ${name} um ${timestamp}\n`;
 
     fs.appendFile('Nachrichten.txt', textToSave, (err) => {
         if (err) {
