@@ -66,17 +66,23 @@
             border: 1px solid #555;
         }
 
-        .photo-gallery {
+        /* Styles für die Nachrichten mit Mülleimer-Icon */
+        .message-item {
             display: flex;
-            flex-wrap: wrap;
-            gap: 10px;
-            margin-top: 20px;
+            align-items: center; /* Mülleimer und Text vertikal zentrieren */
+            justify-content: flex-start;
+            margin: 10px 0;
         }
 
-        .photo-gallery img {
-            width: 100px;
-            height: 100px;
-            object-fit: cover;
+        .delete-icon {
+            cursor: pointer;
+            color: red;
+            margin-right: 10px; /* Abstand zwischen Icon und Text */
+            font-size: 18px; /* Größe des Mülleimer-Icons */
+        }
+
+        .message-text {
+            flex: 1; /* Text nimmt den restlichen Platz ein */
         }
 
         @media (max-width: 600px) {
@@ -98,63 +104,129 @@
 <body>
     <h1>♡ Willkommen auf der Party! ♡</h1>
     
-    <!-- Formular zum Hochladen eines Fotos -->
+    <p class="personal-message">Danke, dass du heute hier bist! <br>
+    Hinterlasse gerne eine Nachricht für mich – ich freue mich auf deine Worte!</p>
+    
     <div class="container">
-        <form id="photoForm" enctype="multipart/form-data">
-            <label for="photo">Foto hochladen:</label>
-            <input type="file" id="photo" name="photo" accept="image/*" required>
-            <button type="submit">Foto hochladen</button>
+        <form id="friendbookForm">
+            <label for="name">Dein Name:</label>
+            <input type="text" id="name" name="name" placeholder="Dein Name" required>
+
+            <label for="message">Deine Nachricht:</label>
+            <textarea id="message" name="message" placeholder="Schreib eine Nachricht" rows="4" required></textarea>
+
+            <button type="submit">Absenden</button>
         </form>
-        <p id="photoResponse"></p>
+        <p id="response"></p>
     </div>
 
-    <!-- Button zum Laden aller Fotos -->
-    <button onclick="loadPhotos()">Alle Fotos anzeigen</button>
-
-    <div class="photo-gallery" id="photoGallery">
-        <!-- Fotos werden hier angezeigt -->
+    <div class="message-box" id="messageBox">
+        <p>Nachrichten werden hier angezeigt...</p>
     </div>
+
+    <button onclick="loadMessages()">Nachrichten laden</button>
+    <button onclick="clearMessages()">Alle Nachrichten löschen</button>
 
     <script>
-        // Foto hochladen
-        document.getElementById('photoForm').addEventListener('submit', function(event) {
+        // Nachrichten absenden
+        document.getElementById('friendbookForm').addEventListener('submit', function(event) {
             event.preventDefault();
 
-            const formData = new FormData();
-            const photo = document.getElementById('photo').files[0];
-            formData.append('photo', photo);
+            const name = document.getElementById('name').value;
+            const message = document.getElementById('message').value;
 
-            fetch('https://gaesteliste.onrender.com/upload-photo', {
+            fetch('https://gaesteliste.onrender.com/submit-message', { 
                 method: 'POST',
-                body: formData
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({ name, message })
             })
             .then(response => response.text())
             .then(data => {
-                document.getElementById('photoResponse').innerHTML = data;
+                document.getElementById('response').innerHTML = data;
+                loadMessages(); // Nachrichten nach dem Absenden neu laden
             })
             .catch((error) => {
-                document.getElementById('photoResponse').innerHTML = 'Fehler beim Hochladen des Fotos.';
+                document.getElementById('response').innerHTML = 'Fehler beim Senden der Nachricht.';
                 console.error('Fehler:', error);
             });
         });
 
-        // Fotos laden und anzeigen
-        function loadPhotos() {
-            fetch('https://gaesteliste.onrender.com/get-photos')
+        // Nachrichten laden und in der Textbox anzeigen
+        function loadMessages() {
+            fetch('https://gaesteliste.onrender.com/get-messages')
                 .then(response => response.json())
                 .then(data => {
-                    const gallery = document.getElementById('photoGallery');
-                    gallery.innerHTML = ''; // Vorherige Fotos löschen
+                    const messageBox = document.getElementById('messageBox');
+                    messageBox.innerHTML = '';
 
-                    data.forEach(photoUrl => {
-                        const img = document.createElement('img');
-                        img.src = photoUrl;
-                        gallery.appendChild(img);
+                    data.forEach(msg => {
+                        const messageItem = document.createElement('div');
+                        messageItem.classList.add('message-item');
+                        messageItem.innerHTML = `
+                            <span class="delete-icon" onclick="deleteMessage(${msg.id})">🗑️</span>
+                            <p class="message-text">"${msg.message}" von ${msg.name}</p>
+                        `;
+                        messageBox.appendChild(messageItem);
                     });
                 })
                 .catch((error) => {
-                    console.error('Fehler beim Laden der Fotos:', error);
+                    document.getElementById('messageBox').innerHTML = 'Fehler beim Laden der Nachrichten.';
+                    console.error('Fehler beim Laden der Nachrichten:', error);
                 });
+        }
+
+        // Nachricht löschen mit Passwortüberprüfung
+        function deleteMessage(id) {
+            const password = prompt('Bitte gib das Admin-Passwort ein:');
+            if (!password) {
+                alert('Abgebrochen.');
+                return;
+            }
+
+            fetch('https://gaesteliste.onrender.com/admin/delete-message', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({ id, password })
+            })
+            .then(response => response.text())
+            .then(data => {
+                alert(data);
+                loadMessages(); // Nachrichten neu laden nach dem Löschen
+            })
+            .catch((error) => {
+                alert('Fehler beim Löschen der Nachricht.');
+                console.error('Fehler:', error);
+            });
+        }
+
+        // Funktion zum Löschen aller Nachrichten
+        function clearMessages() {
+            const password = prompt('Bitte gib das Admin-Passwort ein:');
+            if (!password) {
+                alert('Abgebrochen.');
+                return;
+            }
+
+            fetch('https://gaesteliste.onrender.com/admin/clear-messages', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({ password })
+            })
+            .then(response => response.text())
+            .then(data => {
+                alert(data);
+                loadMessages(); // Nachrichten neu laden nach dem Löschen
+            })
+            .catch((error) => {
+                alert('Fehler beim Löschen der Nachrichten.');
+                console.error('Fehler:', error);
+            });
         }
     </script>
 </body>
