@@ -66,10 +66,23 @@
             border: 1px solid #555;
         }
 
+        /* Styles für die Nachrichten mit Mülleimer-Icon */
+        .message-item {
+            display: flex;
+            align-items: center; /* Mülleimer und Text vertikal zentrieren */
+            justify-content: flex-start;
+            margin: 10px 0;
+        }
+
         .delete-icon {
             cursor: pointer;
             color: red;
-            margin-right: 10px;
+            margin-right: 10px; /* Abstand zwischen Icon und Text */
+            font-size: 18px; /* Größe des Mülleimer-Icons */
+        }
+
+        .message-text {
+            flex: 1; /* Text nimmt den restlichen Platz ein */
         }
 
         @media (max-width: 600px) {
@@ -150,9 +163,10 @@
 
                     data.forEach(msg => {
                         const messageItem = document.createElement('div');
+                        messageItem.classList.add('message-item');
                         messageItem.innerHTML = `
                             <span class="delete-icon" onclick="deleteMessage(${msg.id})">🗑️</span>
-                            <p>"${msg.message}" von ${msg.name}</p>
+                            <p class="message-text">"${msg.message}" von ${msg.name}</p>
                         `;
                         messageBox.appendChild(messageItem);
                     });
